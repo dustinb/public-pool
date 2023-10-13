@@ -27,14 +27,15 @@ export class ClientEntity extends TrackedEntity {
     userAgent: string;
 
 
-
-    @Column({ type: 'datetime', transformer: new DateTimeTransformer() })
+    // TODO: figure out why new Date() is not acceptable
+    // @Column({ type: 'datetime', transformer: new DateTimeTransformer()})
+    @Column({ type: 'datetime'})
     startTime: Date;
 
     @Column({ type: 'real', default: 0 })
     bestDifficulty: number
 
-    @Column({ default: 0 })
+    @Column({ type: 'bigint', default: 0 })
     hashRate: number;
 
 }

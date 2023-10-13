@@ -9,6 +9,7 @@ export abstract class TrackedEntity {
     @CreateDateColumn({ type: 'datetime', transformer: new DateTimeTransformer() })
     public createdAt?: Date
 
-    @UpdateDateColumn({ type: 'datetime', transformer: new DateTimeTransformer() })
+    // @UpdateDateColumn({ type: 'datetime', transformer: new DateTimeTransformer() })
+    @UpdateDateColumn({ type: 'datetime' })
     public updatedAt?: Date
 }

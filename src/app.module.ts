@@ -24,6 +24,7 @@ import { ProxyService } from './services/proxy.service';
 import { StratumV1JobsService } from './services/stratum-v1-jobs.service';
 import { StratumV1Service } from './services/stratum-v1.service';
 import { TelegramService } from './services/telegram.service';
+import * as dotenv from 'dotenv';
 
 const ORMModules = [
     ClientStatisticsModule,
@@ -33,10 +34,13 @@ const ORMModules = [
     BlocksModule
 ]
 
-@Module({
-    imports: [
-        ConfigModule.forRoot(),
-        TypeOrmModule.forRoot({
+let DBConfig = {};
+dotenv.config();
+console.log(process.env);
+
+switch (process.env.DB_TYPE) {
+    case "sqlite":
+        DBConfig = {
             type: 'sqlite',
             database: './DB/public-pool.sqlite',
             synchronize: true,
@@ -45,7 +49,29 @@ const ORMModules = [
             logging: false,
             enableWAL: true,
             busyTimeout: 30 * 1000,
-        }),
+        }
+    case "mariadb":
+        DBConfig = {
+            type: 'mariadb',
+            database: process.env.DB_DATABASE,
+            host: process.env.DB_HOST,
+            port: process.env.DB_PORT,
+            username: process.env.DB_USER,
+            password: process.env.DB_PASS,
+            synchronize: true,
+            autoLoadEntities: true,
+            cache: true,
+            logging: false,
+            busyTimeout: 30 * 1000,
+        }
+}
+
+console.log(DBConfig);
+
+@Module({
+    imports: [
+        ConfigModule.forRoot(),
+        TypeOrmModule.forRoot(DBConfig),
         CacheModule.register(),
         ScheduleModule.forRoot(),
         HttpModule,

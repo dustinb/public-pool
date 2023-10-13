@@ -5,6 +5,7 @@ import { BehaviorSubject, filter, shareReplay } from 'rxjs';
 
 import { IBlockTemplate } from '../models/bitcoin-rpc/IBlockTemplate';
 import { IMiningInfo } from '../models/bitcoin-rpc/IMiningInfo';
+import * as zmq from 'zeromq';
 
 @Injectable()
 export class BitcoinRpcService {
@@ -25,15 +26,26 @@ export class BitcoinRpcService {
 
         console.log('Bitcoin RPC connected');
 
-        // Maybe use ZeroMQ ?
-        setInterval(async () => {
+        // var zmq = require("zeromq"),
+        const sock = zmq.socket("sub");
+        sock.connect("tcp://127.0.0.1:3000");
+        sock.subscribe("rawblock");
+        console.log("Subscriber connected to port 3000");
+        
+        sock.on("message", async (topic: Buffer, message: Buffer) => {
+            console.log("new block zmq");
+            const miningInfo = await this.getMiningInfo();
+            this._newBlock$.next(miningInfo);
+            this.blockHeight = miningInfo.blocks;
+        });
+
+        setTimeout(async () => {
             const miningInfo = await this.getMiningInfo();
             if (miningInfo != null && miningInfo.blocks > this.blockHeight) {
                 this._newBlock$.next(miningInfo);
                 this.blockHeight = miningInfo.blocks;
             }
-
-        }, 500);
+        }, 1);
     }
 
 
@@ -59,6 +71,7 @@ export class BitcoinRpcService {
         try {
             return await this.client.getmininginfo();
         } catch (e) {
+            console.log(e);
             console.log('Error getmininginfo');
             return null;
         }

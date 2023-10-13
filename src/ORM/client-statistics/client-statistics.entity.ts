@@ -21,7 +21,7 @@ export class ClientStatisticsEntity extends TrackedEntity {
     sessionId: string;
 
     @Index()
-    @Column({ type: 'integer' })
+    @Column({ type: 'bigint' })
     time: number;
 
     @Column({ type: 'real' })
